@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSettings {
+  id               String   @id @default("1")
+  title            String   @default("Xtreme off-road 4x4 tanger")
+  description      String   @default("Car repair and maintenance service")
+  address          String   @default("al mansour, 47 Av. Yakoub El Mansour, Tanger 90000")
+  phone            String   @default("+212 (0) 6 61 72 06 63")
+  whatsapp         String   @default("+212 (0) 6 61 72 06 63")
+  instagram        String   @default("https://instagram.com")
+  primaryColor     String   @default("#e11d48") // rose-600
+  secondaryColor   String   @default("#1f2937") // gray-800
+  accentColor      String   @default("#fbbf24") // amber-400
+  typographyFamily String   @default("Inter")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Package {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  price       String?
+  duration    String?
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  imageUrl    String?
+  category    String   // "Location", "Preparation", "Formation"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model GalleryImage {
+  id          String   @id @default(cuid())
+  url         String
+  altText     String?
+  category    String?  // Optional grouping
+  createdAt   DateTime @default(now())
+}
