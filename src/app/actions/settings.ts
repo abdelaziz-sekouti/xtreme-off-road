@@ -5,10 +5,10 @@ import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-export async function updateSettings(formData: FormData) {
+export async function updateSettings(formData: FormData): Promise<void> {
   const session = await getServerSession(authOptions);
   if (!session) {
-    return { error: "Non autorisé" };
+    return;
   }
 
   const title = formData.get("title") as string;
@@ -24,17 +24,15 @@ export async function updateSettings(formData: FormData) {
 
   try {
     await pool.query(
-      `UPDATE site_settings 
-       SET title = ?, description = ?, address = ?, phone = ?, whatsapp = ?, instagram = ?, 
+      `UPDATE site_settings
+       SET title = ?, description = ?, address = ?, phone = ?, whatsapp = ?, instagram = ?,
            primaryColor = ?, secondaryColor = ?, accentColor = ?, typographyFamily = ?
        WHERE id = '1'`,
       [title, description, address, phone, whatsapp, instagram, primaryColor, secondaryColor, accentColor, typographyFamily]
     );
 
     revalidatePath("/", "layout"); // Revalidate entire layout to apply new theme
-    return { success: true };
   } catch (error: any) {
     console.error("Failed to update settings:", error);
-    return { error: "Erreur lors de la mise à jour" };
   }
 }

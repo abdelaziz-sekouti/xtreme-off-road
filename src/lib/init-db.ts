@@ -74,6 +74,32 @@ async function initDB() {
     )
   `);
 
+  await connection.execute(`
+    CREATE TABLE IF NOT EXISTS carousels (
+      id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+      title VARCHAR(255),
+      subtitle TEXT,
+      imageUrl VARCHAR(500),
+      buttonText VARCHAR(100),
+      buttonLink VARCHAR(255),
+      sortOrder INT DEFAULT 0,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Seed default carousel slides if empty
+  const [carouselRows] = await connection.execute('SELECT COUNT(*) as count FROM carousels');
+  if ((carouselRows as any[])[0].count === 0) {
+    await connection.execute(`
+      INSERT INTO carousels (id, title, subtitle, imageUrl, buttonText, buttonLink, sortOrder) VALUES
+      (UUID(), 'Explorez le Maroc en 4×4', 'Vivez une aventure hors du commun à travers les dunes et les montagnes du Maroc.', 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=2070&auto=format&fit=crop', 'Découvrir nos packages', '/packages', 1),
+      (UUID(), 'Formation Pilote & Co-pilote', 'Apprenez les techniques de pilotage tout-terrain avec nos experts.', 'https://images.unsplash.com/photo-1609619385076-36a873425636?q=80&w=2070&auto=format&fit=crop', 'Voir nos formations', '/formation', 2),
+      (UUID(), 'Préparation de votre 4×4', 'Expertise et préparation de votre véhicule pour affronter les terrains les plus extrêmes.', 'https://images.unsplash.com/photo-1619642751034-765dfdf0c4ef?q=80&w=2070&auto=format&fit=crop', 'Nos services', '/preparation', 3)
+    `);
+    console.log('Default carousel slides seeded.');
+  }
+
   // Seed default settings if not exists
   const [rows] = await connection.execute('SELECT * FROM site_settings WHERE id = "1"');
   if ((rows as any[]).length === 0) {

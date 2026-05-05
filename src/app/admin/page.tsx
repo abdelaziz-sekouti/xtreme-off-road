@@ -1,28 +1,44 @@
-import { pool } from "@/lib/db";
+'use client';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { PackageOpen, Settings, Users, ImageIcon } from "lucide-react";
-import Link from "next/link";
 
-export default async function AdminDashboard() {
-  const [packages] = await pool.query('SELECT COUNT(*) as count FROM packages');
-  const [services] = await pool.query('SELECT COUNT(*) as count FROM services');
-  
-  const packageCount = (packages as any[])[0].count;
-  const serviceCount = (services as any[])[0].count;
+interface Stat {
+  title: string;
+  count: number;
+  icon: any;
+  color: string;
+  link: string;
+}
 
-  const stats = [
-    { title: "Packages", count: packageCount, icon: PackageOpen, color: "bg-blue-500", link: "/admin/packages" },
-    { title: "Services", count: serviceCount, icon: Settings, color: "bg-green-500", link: "/admin/services" },
-    { title: "Galerie Images", count: 0, icon: ImageIcon, color: "bg-purple-500", link: "/admin/gallery" },
-  ];
+export default function AdminDashboard() {
+  const [stats, setStats] = useState<Stat[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/admin/packages').then(r => r.json()),
+      fetch('/api/admin/services').then(r => r.json()),
+    ]).then(([packages, services]) => {
+      setStats([
+        { title: "Packages", count: Array.isArray(packages) ? packages.length : 0, icon: PackageOpen, color: "bg-blue-500", link: "/admin/packages" },
+        { title: "Services", count: Array.isArray(services) ? services.length : 0, icon: Settings, color: "bg-green-500", link: "/admin/services" },
+        { title: "Galerie Images", count: 0, icon: ImageIcon, color: "bg-purple-500", link: "/admin/gallery" },
+      ]);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div className="p-8">Chargement...</div>;
 
   return (
     <div>
       <h1 className="text-3xl font-black text-gray-800 mb-8">Tableau de Bord</h1>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {stats.map((stat, index) => (
           <Link key={index} href={stat.link} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition flex items-center">
-            <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-white \${stat.color} mr-6`}>
+            <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-white ${stat.color} mr-6`}>
               <stat.icon className="w-7 h-7" />
             </div>
             <div>

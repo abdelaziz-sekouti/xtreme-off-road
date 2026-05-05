@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Menu, Info, X, Phone, MapPin, Mail, User } from "lucide-react";
 import { InstagramIcon as Instagram } from "@/components/ui/icons";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,25 +10,26 @@ import clsx from "clsx";
 export default function Navbar({ settings }: { settings: any }) {
   const [isLeftOpen, setIsLeftOpen] = useState(false);
   const [isRightOpen, setIsRightOpen] = useState(false);
+  const router = useRouter();
 
   const navLinks = [
-    { name: "Accueil", href: "/" },
-    { name: "Nos Packages", href: "/packages" },
-    { name: "Location", href: "/location" },
-    { name: "Préparation", href: "/preparation" },
-    { name: "Formation", href: "/formation" },
-    { name: "À Propos", href: "/about" },
-    { name: "Contact", href: "/contact" },
+    { name: "Accueil", onClick: () => { router.push("/"); setIsLeftOpen(false); } },
+    { name: "Nos Packages",onClick: () => { router.push("/packages"); setIsLeftOpen(false); }},
+    { name: "Location", onClick: () => { router.push("/location"); setIsLeftOpen(false); } },
+    { name: "Préparation", onClick: () => { router.push("/preparation"); setIsLeftOpen(false); } },
+    { name: "Formation", onClick: () => { router.push("/formation"); setIsLeftOpen(false); } },
+    { name: "À Propos", onClick: () => { router.push("/about"); setIsLeftOpen(false); } },
+    { name: "Contact", onClick: () => { router.push("/contact"); setIsLeftOpen(false); } },
   ];
 
-  const drawerVariants = {
+  const drawerVariants: any = {
     hidden: (direction: "left" | "right") => ({
       x: direction === "left" ? "-100%" : "100%",
-      transition: { duration: 0.3, ease: "easeInOut" },
+      transition: { duration: 0.3, ease: "easeInOut" as const },
     }),
     visible: {
       x: 0,
-      transition: { duration: 0.3, ease: "easeInOut" },
+      transition: { duration: 0.3, ease: "easeInOut" as const },
     },
   };
 
@@ -49,9 +50,13 @@ export default function Navbar({ settings }: { settings: any }) {
             <a href={settings.instagram} target="_blank" rel="noreferrer" className="text-gray-500 hover:text-primary">
               <Instagram className="w-4 h-4" />
             </a>
-            <Link href="/admin" className="text-gray-500 hover:text-primary">
+            <button
+              type="button"
+              onClick={() => router.push("/admin")}
+              className="text-gray-500 hover:text-primary cursor-pointer bg-transparent border-0 p-0"
+            >
               <User className="w-4 h-4" />
-            </Link>
+            </button>
           </div>
         </div>
       </div>
@@ -68,34 +73,43 @@ export default function Navbar({ settings }: { settings: any }) {
           </button>
 
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 z-50 relative group">
+          <button
+            type="button"
+            onClick={() => { router.push("/"); setIsLeftOpen(false); }}
+            className="flex items-center space-x-2 z-50 relative group cursor-pointer bg-transparent border-0 p-0"
+          >
             <div className="w-20 h-20 bg-primary flex items-center justify-center rounded-xl transform rotate-[-10deg] group-hover:rotate-0 transition-all duration-300 shadow-lg">
-              <div className="w-16 h-16 border-2 border-white flex flex-col items-center justify-center rounded-lg rotate-[10deg] group-hover:rotate-0 transition-all duration-300">
+              <div className="w-16 h-16 border-2 border-white flex flex-col items-center justify-center rounded-lg rotate-10 group-hover:rotate-0 transition-all duration-300">
                 <span className="text-white font-black text-xl leading-none">4x4</span>
                 <span className="text-white text-[10px] font-bold">XTREME</span>
               </div>
             </div>
-          </Link>
+          </button>
 
           {/* Desktop Nav Links */}
           <div className="hidden md:flex space-x-8 items-center font-medium">
             {navLinks.map((link) => (
-              <Link 
-                key={link.name} 
-                href={link.href}
-                className="text-gray-800 hover:text-primary transition relative group"
+              <button
+                key={link.name}
+                type="button"
+                onClick={link.onClick}
+                className="text-gray-800 hover:text-primary transition relative group cursor-pointer bg-transparent border-0 p-0"
               >
                 {link.name}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-              </Link>
+              </button>
             ))}
           </div>
 
           {/* Right Info Icon */}
           <div className="flex items-center space-x-4">
-            <Link href="/admin" className="p-2 text-gray-700 hover:text-primary hidden md:block">
+            <button
+              type="button"
+              onClick={() => router.push("/admin")}
+              className="p-2 text-gray-700 hover:text-primary hidden md:block cursor-pointer bg-transparent border-0"
+            >
               <User className="w-6 h-6" />
-            </Link>
+            </button>
             <button 
               onClick={() => setIsRightOpen(true)}
               className="p-2 text-gray-700 hover:text-primary transition"
@@ -131,14 +145,13 @@ export default function Navbar({ settings }: { settings: any }) {
               </div>
               <div className="flex-1 overflow-y-auto py-6 px-4 space-y-4">
                 {navLinks.map((link) => (
-                  <Link 
-                    key={link.name} 
-                    href={link.href}
-                    onClick={() => setIsLeftOpen(false)}
+                  <button
+                    key={link.name}
+                    onClick={link.onClick}
                     className="block px-4 py-3 text-lg font-medium text-gray-800 hover:bg-primary/10 hover:text-primary rounded-xl transition"
                   >
                     {link.name}
-                  </Link>
+                  </button>
                 ))}
               </div>
               <div className="p-6 border-t border-gray-100 bg-gray-50">
@@ -184,15 +197,15 @@ export default function Navbar({ settings }: { settings: any }) {
                 
                 <div className="space-y-4">
                   <div className="flex items-start">
-                    <MapPin className="w-6 h-6 text-accent mr-4 flex-shrink-0 mt-1" />
+                    <MapPin className="w-6 h-6 text-accent mr-4 shrink-0 mt-1" />
                     <p className="text-gray-300">{settings.address}</p>
                   </div>
                   <div className="flex items-center">
-                    <Phone className="w-6 h-6 text-accent mr-4 flex-shrink-0" />
+                    <Phone className="w-6 h-6 text-accent mr-4 shrink-0" />
                     <p className="text-gray-300">{settings.phone}</p>
                   </div>
                   <div className="flex items-center">
-                    <Mail className="w-6 h-6 text-accent mr-4 flex-shrink-0" />
+                    <Mail className="w-6 h-6 text-accent mr-4 shrink-0" />
                     <p className="text-gray-300">contact@xtremeoffroad.com</p>
                   </div>
                 </div>
