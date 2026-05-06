@@ -49,6 +49,7 @@ export default function SettingsPage() {
     setSaving(true);
     const formData = new FormData(e.target as HTMLFormElement);
     const data = Object.fromEntries(formData.entries());
+    console.log('Sending settings data:', data);
 
     try {
       const res = await fetch('/api/settings', {
@@ -57,6 +58,9 @@ export default function SettingsPage() {
         body: JSON.stringify(data),
       });
       if (res.ok) {
+        // Refetch settings to update the form
+        const updated = await fetch('/api/settings').then(r => r.json());
+        setSettings(updated);
         showModal('success', 'Succès', 'Paramètres enregistrés !');
       } else {
         showModal('error', 'Erreur', 'Erreur lors de l\'enregistrement');

@@ -22,7 +22,7 @@ export default function Footer({ settings }: { settings: any }) {
                 </a>
               )}
               {settings.facebook && (
-                <a href={settings.facebook} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition" aria-label="Facebook">
+                <a href={settings.facebook} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition " aria-label="Facebook">
                   <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.387H7.078v-3.467h3.047V9.309c0-3.005 1.792-4.669 4.533-4.669 1.312 0 2.686.236 2.686.236v2.953h-1.513c-1.491 0-1.956.993-1.956 2.013v2.258h3.328l-.532 3.467h-2.796v8.387C19.612 23.027 24 18.062 24 12.073z"/></svg>
                 </a>
               )}

@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const keysParam = searchParams.get('keys');
-    const [rows] = await pool.query('SELECT * FROM settings LIMIT 1');
+    const [rows] = await pool.query('SELECT * FROM site_settings LIMIT 1');
     const settings = (rows as any[])[0] || {};
 
     if (keysParam) {
@@ -26,25 +26,33 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log('Settings POST body:', body);
     const fields = ['title', 'description', 'address', 'phone', 'whatsapp', 'instagram', 'facebook', 'youtube', 'twitter', 'primaryColor', 'secondaryColor', 'accentColor', 'typographyFamily'];
-    const [existing] = await pool.query('SELECT id FROM settings LIMIT 1');
+    const [existing] = await pool.query('SELECT id FROM site_settings LIMIT 1');
     const exists = (existing as any[]).length > 0;
-    
+    console.log('Settings exists:', exists);
+
     if (exists) {
       const updates = fields.filter(f => body[f] !== undefined).map(f => `${f} = ?`).join(', ');
       const values = fields.filter(f => body[f] !== undefined).map(f => body[f]);
+      console.log('Updates:', updates, 'Values:', values);
       if (updates) {
-        await pool.query(`UPDATE settings SET ${updates}`, values);
+        const query = `UPDATE site_settings SET ${updates} WHERE id = '1'`;
+        console.log('Executing query:', query, 'with values:', values);
+        await pool.query(query, values);
       }
     } else {
-      const insertFields = fields.filter(f => body[f] !== undefined);
+      const insertFields = ['id', ...fields.filter(f => body[f] !== undefined)];
       const placeholders = insertFields.map(() => '?').join(', ');
-      const values = insertFields.map(f => body[f]);
-      await pool.query(`INSERT INTO settings (${insertFields.join(', ')}) VALUES (${placeholders})`, values);
+      const values = ['1', ...insertFields.slice(1).map(f => body[f])];
+      console.log('Insert fields:', insertFields, 'Values:', values);
+      const query = `INSERT INTO site_settings (${insertFields.join(', ')}) VALUES (${placeholders})`;
+      console.log('Executing query:', query, 'with values:', values);
+      await pool.query(query, values);
     }
     return NextResponse.json({ message: 'Settings updated' });
   } catch (error) {
-    console.error(error);
+    console.error('Settings POST error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

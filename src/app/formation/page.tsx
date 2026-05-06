@@ -40,7 +40,7 @@ export default function FormationPage() {
                   <img src={service.imageUrl} alt={service.title} className="w-full h-48 object-cover" />
                 )}
                 <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2">{service.title}</h3>
+                  <h3 className="text-xl text-blue-700 font-bold mb-2">{service.title}</h3>
                   <p className="text-gray-600">{service.description}</p>
                 </div>
               </div>

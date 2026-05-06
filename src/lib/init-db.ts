@@ -21,8 +21,11 @@ async function initDB() {
     )
   `);
 
+  // Drop and recreate to ensure all columns are present
+  await connection.execute(`DROP TABLE IF EXISTS settings`);
+
   await connection.execute(`
-    CREATE TABLE IF NOT EXISTS site_settings (
+    CREATE TABLE settings (
       id VARCHAR(191) PRIMARY KEY DEFAULT '1',
       title VARCHAR(191) DEFAULT 'Xtreme off-road 4x4 tanger',
       description TEXT,
@@ -30,6 +33,9 @@ async function initDB() {
       phone VARCHAR(191) DEFAULT '+212 (0) 6 61 72 06 63',
       whatsapp VARCHAR(191) DEFAULT '+212 (0) 6 61 72 06 63',
       instagram VARCHAR(191) DEFAULT 'https://instagram.com',
+      facebook VARCHAR(191) DEFAULT 'https://facebook.com',
+      youtube VARCHAR(191) DEFAULT 'https://youtube.com',
+      twitter VARCHAR(191) DEFAULT 'https://twitter.com',
       primaryColor VARCHAR(191) DEFAULT '#e11d48',
       secondaryColor VARCHAR(191) DEFAULT '#1f2937',
       accentColor VARCHAR(191) DEFAULT '#fbbf24',
@@ -38,6 +44,8 @@ async function initDB() {
       updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )
   `);
+
+  console.log('Recreated settings table with all columns');
 
   await connection.execute(`
     CREATE TABLE IF NOT EXISTS packages (
@@ -101,10 +109,10 @@ async function initDB() {
   }
 
   // Seed default settings if not exists
-  const [rows] = await connection.execute('SELECT * FROM site_settings WHERE id = "1"');
+  const [rows] = await connection.execute('SELECT * FROM settings WHERE id = "1"');
   if ((rows as any[]).length === 0) {
     await connection.execute(`
-      INSERT INTO site_settings (id, description) VALUES ('1', 'Car repair and maintenance service')
+      INSERT INTO settings (id, description) VALUES ('1', 'Car repair and maintenance service')
     `);
   }
 
