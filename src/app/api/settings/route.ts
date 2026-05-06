@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const keysParam = searchParams.get('keys');
-    const [rows] = await pool.query('SELECT * FROM site_settings LIMIT 1');
+    const [rows] = await pool.query('SELECT * FROM settings LIMIT 1');
     const settings = (rows as any[])[0] || {};
 
     if (keysParam) {
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('Settings POST body:', body);
     const fields = ['title', 'description', 'address', 'phone', 'whatsapp', 'instagram', 'facebook', 'youtube', 'twitter', 'primaryColor', 'secondaryColor', 'accentColor', 'typographyFamily'];
-    const [existing] = await pool.query('SELECT id FROM site_settings LIMIT 1');
+    const [existing] = await pool.query('SELECT id FROM settings LIMIT 1');
     const exists = (existing as any[]).length > 0;
     console.log('Settings exists:', exists);
 
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       const values = fields.filter(f => body[f] !== undefined).map(f => body[f]);
       console.log('Updates:', updates, 'Values:', values);
       if (updates) {
-        const query = `UPDATE site_settings SET ${updates} WHERE id = '1'`;
+        const query = `UPDATE settings SET ${updates} WHERE id = '1'`;
         console.log('Executing query:', query, 'with values:', values);
         await pool.query(query, values);
       }
@@ -46,10 +46,13 @@ export async function POST(request: NextRequest) {
       const placeholders = insertFields.map(() => '?').join(', ');
       const values = ['1', ...insertFields.slice(1).map(f => body[f])];
       console.log('Insert fields:', insertFields, 'Values:', values);
-      const query = `INSERT INTO site_settings (${insertFields.join(', ')}) VALUES (${placeholders})`;
+      const query = `INSERT INTO settings (${insertFields.join(', ')}) VALUES (${placeholders})`;
       console.log('Executing query:', query, 'with values:', values);
       await pool.query(query, values);
     }
+    // Verify the update
+    const [verify] = await pool.query('SELECT * FROM settings WHERE id = ?', ['1']);
+    console.log('Updated settings:', (verify as any[])[0]);
     return NextResponse.json({ message: 'Settings updated' });
   } catch (error) {
     console.error('Settings POST error:', error);
