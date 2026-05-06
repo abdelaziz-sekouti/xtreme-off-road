@@ -16,17 +16,6 @@ interface Slide {
   buttonLink?: string;
 }
 
-const defaultSlides: Slide[] = [
-  {
-    id: "default-1",
-    title: "Xtreme Off‑Road 4x4",
-    subtitle: "Découvrez le Maroc et l'Afrique au volant d'un 4×4",
-    imageUrl: "/uploads/images/carousel/download.jpeg", // Using actual file from carousel folder
-    buttonText: "Voir nos packages",
-    buttonLink: "/packages",
-  },
-];
-
 export default function HeroCarousel() {
   const [slides, setSlides] = useState<Slide[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,18 +26,20 @@ export default function HeroCarousel() {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
+    console.log('Fetching carousels');
     fetch("/api/admin/carousels")
       .then((r) => r.json())
       .then((data) => {
+        console.log('Carousel data:', data);
         if (Array.isArray(data) && data.length > 0) {
-          // Use imageUrl as returned by API
           setSlides(data);
         } else {
           setSlides(defaultSlides);
         }
         setLoading(false);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log('Error fetching carousels:', error);
         setSlides(defaultSlides);
         setLoading(false);
       });
@@ -90,13 +81,20 @@ export default function HeroCarousel() {
   }
 
   return (
-    <div className="relative w-full h-full overflow-hidden" ref={emblaRef}>
+    <div className="relative w-full h-screen overflow-hidden" ref={emblaRef}>
       <div className="flex h-full w-full">
         {slides.map((slide, index) => (
-          <div key={slide.id} className="relative flex-[0_0_100%] h-full min-w-0">
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${slide.imageUrl || "/uploads/images/carousel/download.jpeg"})` }}
+          <div key={slide.id} className="relative flex-[0_0_100%] h-full min-w-0 border-2 border-red-500">
+            <img
+              src={
+                slide.imageUrl?.startsWith('http')
+                  ? "/uploads/images/carousel/images_(1).jpeg" // Fallback for external URLs
+                  : slide.imageUrl?.startsWith('/')
+                    ? slide.imageUrl
+                    : `/${slide.imageUrl}` || "/uploads/images/carousel/images_(1).jpeg"
+              }
+              className="absolute inset-0 w-full h-full object-cover"
+              alt="carousel slide"
             />
             <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/50 to-transparent" />
             <div className="absolute inset-0 flex items-center">

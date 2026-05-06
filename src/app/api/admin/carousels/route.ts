@@ -21,9 +21,12 @@ const createTable = async () => {
 
 export async function GET() {
   try {
+    console.log('Creating table if not exists');
     await createTable();
     const [rows] = await pool.query('SELECT * FROM carousels ORDER BY sortOrder ASC');
+    console.log('Fetched rows:', (rows as any[]).length);
     if ((rows as any[]).length === 0) {
+      console.log('Seeding default slides');
       // Seed default slides with actual uploaded images
       await pool.query(`
         INSERT INTO carousels (id, title, subtitle, imageUrl, buttonText, buttonLink, sortOrder) VALUES
@@ -32,11 +35,12 @@ export async function GET() {
         (UUID(), 'Préparation de votre 4×4', 'Expertise et préparation de votre véhicule pour affronter les terrains les plus extrêmes.', '/uploads/images/carousel/images_(3).jpeg', 'Nos services', '/preparation', 3)
       `);
       const [newRows] = await pool.query('SELECT * FROM carousels ORDER BY sortOrder ASC');
+      console.log('Seeded rows:', (newRows as any[]).length);
       return NextResponse.json(newRows);
     }
     return NextResponse.json(rows);
   } catch (error) {
-    console.error(error);
+    console.error('API error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }
