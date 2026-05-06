@@ -28,7 +28,7 @@ export default function FormationPage() {
     <main className="min-h-screen">
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold text-center mb-4">Formation Conduite</h1>
+          <h1 className="text-4xl font-bold text-center mb-4 text-purple-900">Formation Conduite</h1>
           <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
             Apprenez les techniques de conduite tout-terrain avec nos formateurs expérimentés.
           </p>

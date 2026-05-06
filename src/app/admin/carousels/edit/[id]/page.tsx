@@ -3,22 +3,26 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Modal from "@/components/ui/Modal";
 
-interface Service {
+interface Slide {
   id: string;
   title: string;
-  description: string;
+  subtitle?: string;
   imageUrl?: string;
-  category: string;
+  buttonText?: string;
+  buttonLink?: string;
+  sortOrder?: number;
 }
 
-export default function EditService({ params }: { params: Promise<{ id: string }> }) {
+export default function EditCarousel({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params);
-  const [service, setService] = useState<Service | null>(null);
+  const [slide, setSlide] = useState<Slide | null>(null);
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [category, setCategory] = useState('Location');
+  const [subtitle, setSubtitle] = useState('');
+  const [buttonText, setButtonText] = useState('');
+  const [buttonLink, setButtonLink] = useState('');
+  const [sortOrder, setSortOrder] = useState('0');
   const [file, setFile] = useState<File | null>(null);
+  const [currentImage, setCurrentImage] = useState('');
   const [uploading, setUploading] = useState(false);
   const [modal, setModal] = useState<{isOpen: boolean, type: 'success'|'error', title: string, message: string}>({
     isOpen: false, type: 'success', title: '', message: ''
@@ -32,72 +36,72 @@ export default function EditService({ params }: { params: Promise<{ id: string }
   const closeModal = () => setModal(prev => ({ ...prev, isOpen: false }));
 
   useEffect(() => {
-    fetch(`/api/admin/services/${id}`)
-      .then((res) => res.json())
+    fetch(`/api/admin/carousels/${id}`)
+      .then((r) => r.json())
       .then((data) => {
-        setService(data);
+        setSlide(data);
         setTitle(data.title || '');
-        setDescription(data.description || '');
+        setSubtitle(data.subtitle || '');
+        setButtonText(data.buttonText || '');
+        setButtonLink(data.buttonLink || '');
+        setSortOrder(String(data.sortOrder || 0));
         const img = data.imageUrl || '';
-        setImageUrl(img.startsWith('/') ? img : `/${img}`);
-        setCategory(data.category);
+        setCurrentImage(img.startsWith('/') ? img : `/${img}`);
       })
       .catch(console.error);
   }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    let finalImageUrl = imageUrl;
+    let imageUrl = currentImage;
     if (file) {
       setUploading(true);
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('folder', 'images');
+      formData.append('folder', 'images/carousel');
       try {
         const uploadRes = await fetch('/api/admin/upload', { method: 'POST', body: formData });
         if (!uploadRes.ok) throw new Error('Upload failed');
         const data = await uploadRes.json();
-        finalImageUrl = data.url;
-      } catch (err) {
+        imageUrl = data.url;
+      } catch {
         showModal('error', 'Erreur', 'Image upload failed');
         setUploading(false);
         return;
       }
       setUploading(false);
     }
-    const res = await fetch(`/api/admin/services/${id}`, {
+    const res = await fetch(`/api/admin/carousels/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, description, imageUrl: finalImageUrl, category }),
+      body: JSON.stringify({ title, subtitle, imageUrl, buttonText, buttonLink, sortOrder: parseInt(sortOrder) }),
     });
     if (res.ok) {
-      router.push('/admin/services');
+      router.push('/admin/carousels');
     } else {
-      showModal('error', 'Erreur', 'Update failed');
+      showModal('error', 'Erreur', 'Failed to update');
     }
   };
 
-  if (!service) return <div className="p-8">Chargement...</div>;
+  if (!slide) return <div className="p-8">Chargement...</div>;
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">Modifier le Service</h1>
+      <h1 className="text-2xl font-bold mb-6">Modifier la Slide</h1>
       <form onSubmit={handleSubmit} className="grid gap-4 max-w-lg">
         <input placeholder="Titre" value={title} onChange={(e) => setTitle(e.target.value)} className="border p-2" required />
-        <textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} className="border p-2" required />
-        {imageUrl && (
+        <textarea placeholder="Sous-titre" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="border p-2" />
+        {currentImage && (
           <div className="mb-2">
             <p className="text-sm text-gray-600 mb-1">Image actuelle:</p>
-            <img src={imageUrl} alt="Current" className="w-32 h-32 object-cover border" />
+            <img src={currentImage} alt="Current" className="w-48 h-32 object-cover border" />
           </div>
         )}
         <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} className="border p-2" />
         {file && <p className="text-sm text-gray-600">Nouvelle image: {file.name}</p>}
-        <select value={category} onChange={(e) => setCategory(e.target.value)} className="border p-2">
-          <option value="Location">Location</option>
-          <option value="Préparation">Préparation</option>
-          <option value="Formation">Formation</option>
-        </select>
+        <input placeholder="Texte du bouton" value={buttonText} onChange={(e) => setButtonText(e.target.value)} className="border p-2" />
+        <input placeholder="Lien du bouton" value={buttonLink} onChange={(e) => setButtonLink(e.target.value)} className="border p-2" />
+        <input type="number" placeholder="Ordre" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="border p-2" />
         <button type="submit" disabled={uploading} className="bg-primary text-white py-2 px-4 rounded disabled:opacity-50">
           {uploading ? 'Uploading...' : 'Enregistrer'}
         </button>

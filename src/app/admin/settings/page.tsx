@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Save } from "lucide-react";
+import Modal from "@/components/ui/Modal";
 
 interface Settings {
   title?: string;
@@ -9,6 +10,9 @@ interface Settings {
   phone?: string;
   whatsapp?: string;
   instagram?: string;
+  facebook?: string;
+  youtube?: string;
+  twitter?: string;
   primaryColor?: string;
   secondaryColor?: string;
   accentColor?: string;
@@ -30,23 +34,35 @@ export default function SettingsPage() {
       .catch(() => setLoading(false));
   }, []);
 
+  const [modal, setModal] = useState<{isOpen: boolean, type: 'success'|'error', title: string, message: string}>({
+    isOpen: false, type: 'success', title: '', message: ''
+  });
+
+  const showModal = (type: 'success'|'error', title: string, message: string) => {
+    setModal({ isOpen: true, type, title, message });
+  };
+
+  const closeModal = () => setModal(prev => ({ ...prev, isOpen: false }));
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     const formData = new FormData(e.target as HTMLFormElement);
+    const data = Object.fromEntries(formData.entries());
 
     try {
       const res = await fetch('/api/settings', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
       });
       if (res.ok) {
-        alert('Paramètres enregistrés !');
+        showModal('success', 'Succès', 'Paramètres enregistrés !');
       } else {
-        alert('Erreur lors de l\'enregistrement');
+        showModal('error', 'Erreur', 'Erreur lors de l\'enregistrement');
       }
     } catch {
-      alert('Erreur de connexion');
+      showModal('error', 'Erreur', 'Erreur de connexion');
     } finally {
       setSaving(false);
     }
@@ -99,7 +115,7 @@ export default function SettingsPage() {
                   type="text"
                   name="address"
                   defaultValue={settings.address}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                 />
               </div>
 
@@ -110,7 +126,7 @@ export default function SettingsPage() {
                     type="text"
                     name="phone"
                     defaultValue={settings.phone}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                   />
                 </div>
                 <div>
@@ -119,7 +135,7 @@ export default function SettingsPage() {
                     type="text"
                     name="whatsapp"
                     defaultValue={settings.whatsapp}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                   />
                 </div>
               </div>
@@ -130,7 +146,37 @@ export default function SettingsPage() {
                   type="url"
                   name="instagram"
                   defaultValue={settings.instagram}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Facebook</label>
+                <input
+                  type="url"
+                  name="facebook"
+                  defaultValue={settings.facebook}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                  placeholder="https://facebook.com/..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">YouTube</label>
+                <input
+                  type="url"
+                  name="youtube"
+                  defaultValue={settings.youtube}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                  placeholder="https://youtube.com/..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Twitter / X</label>
+                <input
+                  type="url"
+                  name="twitter"
+                  defaultValue={settings.twitter}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                  placeholder="https://twitter.com/..."
                 />
               </div>
             </div>
@@ -186,7 +232,7 @@ export default function SettingsPage() {
                   type="text"
                   name="typographyFamily"
                   defaultValue={settings.typographyFamily}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                   placeholder="ex: Inter, Roboto, Outfit"
                 />
                 <p className="text-xs text-gray-500 mt-1">Sera importée dynamiquement.</p>
@@ -207,6 +253,14 @@ export default function SettingsPage() {
           </div>
         </form>
       </div>
+
+      <Modal
+        isOpen={modal.isOpen}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        onClose={closeModal}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Modal from "@/components/ui/Modal";
 
 interface GalleryImage {
   id: string;
@@ -12,11 +13,20 @@ interface GalleryImage {
 export default function GalleryAdmin() {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [modal, setModal] = useState<{isOpen: boolean, type: 'success'|'error', title: string, message: string}>({
+    isOpen: false, type: 'success', title: '', message: ''
+  });
+
+  const showModal = (type: 'success'|'error', title: string, message: string) => {
+    setModal({ isOpen: true, type, title, message });
+  };
+
+  const closeModal = () => setModal(prev => ({ ...prev, isOpen: false }));
 
   const fetchImages = async () => {
     try {
       const res = await fetch('/api/admin/gallery');
-      if (!res.ok) throw new Error('Failed');
+      if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
       setImages(data);
     } catch (e: any) {
@@ -27,10 +37,15 @@ export default function GalleryAdmin() {
   useEffect(() => { fetchImages(); }, []);
 
   const deleteImage = async (id: string) => {
-    if (!confirm('Delete this image?')) return;
-    const res = await fetch(`/api/admin/gallery/${id}`, { method: 'DELETE' });
-    if (res.ok) setImages(images.filter((img) => img.id !== id));
-    else alert('Delete failed');
+    if (!window.confirm('Supprimer cette image?')) return;
+    try {
+      const res = await fetch(`/api/admin/gallery/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Delete failed');
+      setImages(images.filter((img) => img.id !== id));
+      showModal('success', 'Succès', 'Image supprimée!');
+    } catch (e: any) {
+      showModal('error', 'Erreur', e.message);
+    }
   };
 
   return (
@@ -53,6 +68,15 @@ export default function GalleryAdmin() {
           </div>
         ))}
       </div>
+      {images.length === 0 && !error && <p className="text-gray-500">Aucune image dans la galerie.</p>}
+
+      <Modal
+        isOpen={modal.isOpen}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        onClose={closeModal}
+      />
     </div>
   );
 }

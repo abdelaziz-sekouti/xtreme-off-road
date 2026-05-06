@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Modal from "@/components/ui/Modal";
 
 interface Package {
   id: string;
@@ -14,6 +15,15 @@ interface Package {
 export default function PackagesAdmin() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [modal, setModal] = useState<{isOpen: boolean, type: 'success'|'error', title: string, message: string}>({
+    isOpen: false, type: 'success', title: '', message: ''
+  });
+
+  const showModal = (type: 'success'|'error', title: string, message: string) => {
+    setModal({ isOpen: true, type, title, message });
+  };
+
+  const closeModal = () => setModal(prev => ({ ...prev, isOpen: false }));
 
   const fetchPackages = async () => {
     try {
@@ -31,13 +41,16 @@ export default function PackagesAdmin() {
   }, []);
 
   const deletePackage = async (id: string) => {
-    if (!confirm('Delete this package?')) return;
+    showModal('error', 'Confirmation', 'Supprimer ce package?');
+    // Replace confirm() with custom modal - for now use browser confirm
+    if (!window.confirm('Supprimer ce package?')) return;
     try {
       const res = await fetch(`/api/admin/packages/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Delete failed');
       setPackages(packages.filter((p) => p.id !== id));
+      showModal('success', 'Succès', 'Package supprimé!');
     } catch (e: any) {
-      alert(e.message);
+      showModal('error', 'Erreur', e.message);
     }
   };
 
@@ -75,6 +88,14 @@ export default function PackagesAdmin() {
           ))}
         </tbody>
       </table>
+
+      <Modal
+        isOpen={modal.isOpen}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        onClose={closeModal}
+      />
     </div>
   );
 }

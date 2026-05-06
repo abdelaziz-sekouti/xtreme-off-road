@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Modal from "@/components/ui/Modal";
 
 export default function CreateCarousel() {
   const [title, setTitle] = useState('');
@@ -10,7 +11,16 @@ export default function CreateCarousel() {
   const [buttonLink, setButtonLink] = useState('');
   const [sortOrder, setSortOrder] = useState('0');
   const [uploading, setUploading] = useState(false);
+  const [modal, setModal] = useState<{isOpen: boolean, type: 'success'|'error', title: string, message: string}>({
+    isOpen: false, type: 'success', title: '', message: ''
+  });
   const router = useRouter();
+
+  const showModal = (type: 'success'|'error', title: string, message: string) => {
+    setModal({ isOpen: true, type, title, message });
+  };
+
+  const closeModal = () => setModal(prev => ({ ...prev, isOpen: false }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,13 +29,14 @@ export default function CreateCarousel() {
       setUploading(true);
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('folder', 'images/carousel');
       try {
         const uploadRes = await fetch('/api/admin/upload', { method: 'POST', body: formData });
         if (!uploadRes.ok) throw new Error('Upload failed');
         const data = await uploadRes.json();
         imageUrl = data.url;
       } catch {
-        alert('Image upload failed');
+        showModal('error', 'Erreur', 'Image upload failed');
         setUploading(false);
         return;
       }
@@ -39,7 +50,7 @@ export default function CreateCarousel() {
     });
 
     if (res.ok) router.push('/admin/carousels');
-    else alert('Failed to create');
+    else showModal('error', 'Erreur', 'Failed to create');
   };
 
   return (
@@ -57,6 +68,14 @@ export default function CreateCarousel() {
           {uploading ? 'Uploading...' : 'Créer'}
         </button>
       </form>
+
+      <Modal
+        isOpen={modal.isOpen}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        onClose={closeModal}
+      />
     </div>
   );
 }

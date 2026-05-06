@@ -1,6 +1,7 @@
 'use client';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Modal from "@/components/ui/Modal";
 
 interface Package {
   id: string;
@@ -11,7 +12,8 @@ interface Package {
   imageUrl?: string;
 }
 
-export default function EditPackage({ params }: { params: { id: string } }) {
+export default function EditPackage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = React.use(params);
   const [pkg, setPkg] = useState<Package | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -20,10 +22,19 @@ export default function EditPackage({ params }: { params: { id: string } }) {
   const [file, setFile] = useState<File | null>(null);
   const [currentImage, setCurrentImage] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [modal, setModal] = useState<{isOpen: boolean, type: 'success'|'error', title: string, message: string}>({
+    isOpen: false, type: 'success', title: '', message: ''
+  });
   const router = useRouter();
 
+  const showModal = (type: 'success'|'error', title: string, message: string) => {
+    setModal({ isOpen: true, type, title, message });
+  };
+
+  const closeModal = () => setModal(prev => ({ ...prev, isOpen: false }));
+
   useEffect(() => {
-    fetch(`/api/admin/packages/${params.id}`)
+    fetch(`/api/admin/packages/${id}`)
       .then(res => res.json())
       .then(data => {
         setPkg(data);
@@ -31,10 +42,11 @@ export default function EditPackage({ params }: { params: { id: string } }) {
         setDescription(data.description);
         setPrice(data.price || '');
         setDuration(data.duration || '');
-        setCurrentImage(data.imageUrl || '');
+        const img = data.imageUrl || '';
+        setCurrentImage(img.startsWith('/') ? img : `/${img}`);
       })
       .catch(err => console.error(err));
-  }, [params.id]);
+  }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +55,7 @@ export default function EditPackage({ params }: { params: { id: string } }) {
       setUploading(true);
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('folder', 'images');
       try {
         const uploadRes = await fetch('/api/admin/upload', {
           method: 'POST',
@@ -52,13 +65,13 @@ export default function EditPackage({ params }: { params: { id: string } }) {
         const data = await uploadRes.json();
         imageUrl = data.url;
       } catch (err) {
-        alert('Image upload failed');
+        showModal('error', 'Erreur', 'Image upload failed');
         setUploading(false);
         return;
       }
       setUploading(false);
     }
-    const res = await fetch(`/api/admin/packages/${params.id}`, {
+    const res = await fetch(`/api/admin/packages/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title, description, price, duration, imageUrl }),
@@ -66,7 +79,7 @@ export default function EditPackage({ params }: { params: { id: string } }) {
     if (res.ok) {
       router.push('/admin/packages');
     } else {
-      alert('Failed to update');
+      showModal('error', 'Erreur', 'Failed to update');
     }
   };
 
@@ -92,6 +105,14 @@ export default function EditPackage({ params }: { params: { id: string } }) {
           {uploading ? 'Uploading...' : 'Enregistrer'}
         </button>
       </form>
+
+      <Modal
+        isOpen={modal.isOpen}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        onClose={closeModal}
+      />
     </div>
   );
 }

@@ -1,24 +1,35 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Modal from "@/components/ui/Modal";
 
 export default function CreateGalleryImage() {
   const [file, setFile] = useState<File | null>(null);
   const [altText, setAltText] = useState('');
   const [category, setCategory] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [modal, setModal] = useState<{isOpen: boolean, type: 'success'|'error', title: string, message: string}>({
+    isOpen: false, type: 'success', title: '', message: ''
+  });
   const router = useRouter();
+
+  const showModal = (type: 'success'|'error', title: string, message: string) => {
+    setModal({ isOpen: true, type, title, message });
+  };
+
+  const closeModal = () => setModal(prev => ({ ...prev, isOpen: false }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      alert('Please select an image');
+      showModal('error', 'Erreur', 'Please select an image');
       return;
     }
 
     setUploading(true);
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('folder', 'images');
 
     try {
       const uploadRes = await fetch('/api/admin/upload', {
@@ -39,10 +50,10 @@ export default function CreateGalleryImage() {
       if (res.ok) {
         router.push('/admin/gallery');
       } else {
-        alert('Failed to add image');
+        showModal('error', 'Erreur', 'Failed to add image');
       }
     } catch (err) {
-      alert('Image upload failed');
+      showModal('error', 'Erreur', 'Image upload failed');
     } finally {
       setUploading(false);
     }
@@ -80,6 +91,14 @@ export default function CreateGalleryImage() {
           {uploading ? 'Uploading...' : 'Ajouter'}
         </button>
       </form>
+
+      <Modal
+        isOpen={modal.isOpen}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        onClose={closeModal}
+      />
     </div>
   );
 }

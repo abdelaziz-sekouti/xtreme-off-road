@@ -24,12 +24,12 @@ export async function GET() {
     await createTable();
     const [rows] = await pool.query('SELECT * FROM carousels ORDER BY sortOrder ASC');
     if ((rows as any[]).length === 0) {
-      // Seed default slides
+      // Seed default slides with actual uploaded images
       await pool.query(`
         INSERT INTO carousels (id, title, subtitle, imageUrl, buttonText, buttonLink, sortOrder) VALUES
-        (UUID(), 'Explorez le Maroc en 4×4', 'Vivez une aventure hors du commun à travers les dunes et les montagnes du Maroc.', 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=2070&auto=format&fit=crop', 'Découvrir nos packages', '/packages', 1),
-        (UUID(), 'Formation Pilote & Co-pilote', 'Apprenez les techniques de pilotage tout-terrain avec nos experts.', 'https://images.unsplash.com/photo-1609619385076-36a873425636?q=80&w=2070&auto=format&fit=crop', 'Voir nos formations', '/formation', 2),
-        (UUID(), 'Préparation de votre 4×4', 'Expertise et préparation de votre véhicule pour affronter les terrains les plus extrêmes.', 'https://images.unsplash.com/photo-1619642751034-765dfdf0c4ef?q=80&w=2070&auto=format&fit=crop', 'Nos services', '/preparation', 3)
+        (UUID(), 'Explorez le Maroc en 4×4', 'Vivez une aventure hors du commun à travers les dunes et les montagnes du Maroc.', '/uploads/images/carousel/images_(1).jpeg', 'Découvrir nos packages', '/packages', 1),
+        (UUID(), 'Formation Pilote & Co-pilote', 'Apprenez les techniques de pilotage tout-terrain avec nos experts.', '/uploads/images/carousel/images_(2).jpeg', 'Voir nos formations', '/formation', 2),
+        (UUID(), 'Préparation de votre 4×4', 'Expertise et préparation de votre véhicule pour affronter les terrains les plus extrêmes.', '/uploads/images/carousel/images_(3).jpeg', 'Nos services', '/preparation', 3)
       `);
       const [newRows] = await pool.query('SELECT * FROM carousels ORDER BY sortOrder ASC');
       return NextResponse.json(newRows);
