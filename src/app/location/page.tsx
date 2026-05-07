@@ -28,14 +28,14 @@ export default function LocationPage() {
     <main className="min-h-screen">
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold text-center mb-4 text-purple-900">Location de Véhicules</h1>
+          <h1 className="text-4xl font-bold text-center mb-4 text-accent">Location de Véhicules</h1>
           <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
             Découvrez notre flotte de véhicules 4x4 disponibles en location pour vos aventures.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {services.map((service) => (
-              <div key={service.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div key={service.id} className="bg-white text-accent rounded-xl shadow-sm overflow-hidden">
                 {service.imageUrl && (
                   <img src={service.imageUrl} alt={service.title} className="w-full h-48 object-cover" />
                 )}

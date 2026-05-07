@@ -16,6 +16,9 @@ interface Slide {
   buttonLink?: string;
 }
 
+// Default fallback slides (empty array)
+const defaultSlides: Slide[] = [];
+
 export default function HeroCarousel() {
   const [slides, setSlides] = useState<Slide[]>([]);
   const [loading, setLoading] = useState(true);
