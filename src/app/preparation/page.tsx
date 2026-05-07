@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import ParallaxSection from '@/components/home/ParallaxSection';
 
 interface Service {
   id: string;
@@ -52,6 +53,13 @@ export default function PreparationPage() {
           )}
         </div>
       </section>
+
+      {/* Parallax Section - Desert Image */}
+      <ParallaxSection
+        imageUrl="/uploads/images/pkg-atlas.jpg"
+        title="Préparation Professionnelle"
+        subtitle="Véhicules prêts pour l'aventure"
+      />
     </main>
   );
 }

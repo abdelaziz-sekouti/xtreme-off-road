@@ -1,6 +1,7 @@
 import HeroCarousel from "@/components/home/HeroCarousel";
 import { ArrowRight, Wrench, Compass, GraduationCap, Star } from "lucide-react";
 import Link from "next/link";
+import ParallaxSection from '@/components/home/ParallaxSection';
 
 export default function Home() {
   const reviews = [
@@ -25,7 +26,7 @@ export default function Home() {
       {/* Intro Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4 text-center max-w-4xl">
-          <h2 className="text-primary font-bold tracking-widest uppercase mb-4">| Packages</h2>
+          <h2 className="text-accent font-bold tracking-widest uppercase mb-4">| Packages</h2>
           <h3 className="text-3xl md:text-5xl font-black text-secondary mb-8">Découvrez le Maroc et l'Afrique au volant d'un 4×4</h3>
           <p className="text-gray-600 text-lg leading-relaxed mb-12">
             Chez Xtreme Off-Road, nos packages ont été conçus pour tous les profils : des curieux désireux de s'initier au pilotage tout-terrain, aux passionnés souhaitant perfectionner leur maîtrise du 4×4 jusqu'aux équipes d'entreprise en quête d'une expérience team-building unique au cœur du désert.
@@ -91,6 +92,13 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Parallax Section - Desert Image */}
+      <ParallaxSection
+        imageUrl="/uploads/images/featured-morocco.jpg"
+        title="Ce que disent nos clients"
+        subtitle="Découvrez leurs expériences inoubliables"
+      />
 
       {/* Reviews Section */}
       <section className="py-20 bg-secondary text-white relative overflow-hidden">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import ParallaxSection from '@/components/home/ParallaxSection';
 
 interface Package {
   id: string;
@@ -68,6 +69,13 @@ export default function PackagesPage() {
           </div>
         )}
       </div>
+
+      {/* Parallax Section - Desert Image */}
+      <ParallaxSection
+        imageUrl="/uploads/images/pkg-desert.jpg"
+        title="Explorez Nos Packages"
+        subtitle="Des aventures inoubliables vous attendent"
+      />
     </main>
   );
 }
